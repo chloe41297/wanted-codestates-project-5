@@ -1,20 +1,63 @@
 import styled from "@emotion/styled";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const SearchBar = () => {
+  const [isWrite, setIsWrite] = useState(false);
+
+  const navigate = useNavigate();
+
+  const isUrl = (strUrl: string) => {
+    const regExp = /^http[s]?\:\/\//i;
+    return regExp.test(strUrl);
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(e.currentTarget.search.value);
+    if (isWrite) {
+      const currentValue = e.currentTarget.search.value;
+      if (isUrl(currentValue)) {
+        navigate(`/pixel/products/image_url=?${currentValue}`, {
+          state: {
+            keyword: currentValue,
+            type: "URL",
+          },
+        });
+      } else {
+        navigate(`/pixel/products/keyword=?${currentValue}`, {
+          state: {
+            keyword: currentValue,
+            type: "KEYWORD",
+          },
+        });
+      }
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value) {
+      setIsWrite(true);
+    } else {
+      setIsWrite(false);
+    }
   };
 
   return (
     <Section>
-      <MainCopy>
-        <strong>Artificial Intelligence </strong>
-        <br /> PXL <strong>Fashion</strong> Viewer
-      </MainCopy>
-      <Form onSubmit={handleSubmit}>
-        <Input placeholder="IMAGE URL or KEYWORD" name="search"></Input>
-        <Button>검색</Button>
+      <Form onSubmit={handleSubmit} autoComplete="off">
+        <Input
+          placeholder="IMAGE URL or KEYWORD"
+          name="search"
+          onChange={handleChange}
+        ></Input>
+        <Button
+          style={{
+            backgroundColor: isWrite ? " #6c5ce7" : "",
+            color: isWrite ? "white" : "black",
+          }}
+        >
+          검색
+        </Button>
       </Form>
     </Section>
   );
@@ -22,13 +65,7 @@ const SearchBar = () => {
 export default SearchBar;
 
 const Section = styled.section``;
-const MainCopy = styled.div`
-  font-size: 50px;
-  text-align: center;
-  line-height: 60px;
 
-  margin-bottom: 60px;
-`;
 const Form = styled.form`
   display: flex;
   justify-content: center;
@@ -48,4 +85,6 @@ const Button = styled.button`
   margin: 0 20px;
   border: none;
   border-radius: 5px;
+  font-weight: 700;
+  font-size: 16px;
 `;

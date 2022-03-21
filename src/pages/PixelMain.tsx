@@ -7,6 +7,10 @@ const PixelMain = () => {
     <>
       <Header></Header>
       <Main>
+        <MainCopy>
+          <strong>Artificial Intelligence </strong>
+          <br /> PXL <strong>Fashion</strong> Viewer
+        </MainCopy>
         <SearchBar></SearchBar>
       </Main>
     </>
@@ -20,4 +24,12 @@ const Main = styled.main`
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+`;
+const MainCopy = styled.div`
+  font-size: 50px;
+  text-align: center;
+  line-height: 60px;
+
+  margin-bottom: 60px;
 `;
