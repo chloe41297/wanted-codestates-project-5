@@ -6,8 +6,7 @@ import ListItem from "components/ListITem";
 import RegionItem from "components/RegionItem";
 import SearchBar from "components/SearchBar";
 import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
-import { json } from "stream/consumers";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface locationObj {
   keyword: string;
@@ -57,7 +56,7 @@ interface Istore {
 }
 const PixelDetails = () => {
   const location = useLocation().state as locationObj;
-  const [products, setProducts] = useState<[] | null>();
+  const [products, setProducts] = useState<[]>();
   const [isDebounce, setIsDebounce] = useState(false);
   const [regionData, setRegionData] = useState<[] | null>();
   const [searchProductName, setSearchProductName] = useState<string>();
@@ -65,6 +64,7 @@ const PixelDetails = () => {
   const currentStore = localStorage.getItem("searchedStore");
   const { keyword, type } = location;
   const skeletonArray = new Array(20).fill("");
+  const navigate = useNavigate();
 
   const fetchData = async () => {
     const productsData = await getProducts();
@@ -128,7 +128,7 @@ const PixelDetails = () => {
     };
     if (currentStore) {
       const parseStore = JSON.parse(currentStore);
-      if (!isExist(parseStore, keyword)) {
+      if (isExist(parseStore, keyword).length === 0) {
         localStorage.setItem(
           "searchedStore",
           JSON.stringify([...parseStore, storeData])
@@ -138,12 +138,21 @@ const PixelDetails = () => {
       localStorage.setItem("searchedStore", JSON.stringify([storeData]));
     }
   };
+  const handleError = () => {
+    alert("검색 결과가 없습니다");
+    navigate("/pixel");
+    return;
+  };
 
   const showAllProducts = async () => {
     if (type === "KEYWORD") {
       const filteredKeyword = await isMatchKeyword(keyword);
+      if (!filteredKeyword.length) {
+        handleError();
+      }
       if (currentStore) {
         const parseStore = JSON.parse(currentStore);
+        // console.log(searchProductName);
         if (isExist(parseStore, keyword).length) {
           const existData = isExist(parseStore, keyword)[0];
           const { name, searchList } = existData;
@@ -164,8 +173,13 @@ const PixelDetails = () => {
       const filteredRegionData = await isMatchRegionData(regionCode);
       const filteredCategory = await isMatchCategory(filteredKeyword[0]);
 
+      if (!filteredKeyword.length) {
+        handleError();
+      }
+
       if (currentStore) {
         const parseStore = JSON.parse(currentStore);
+        // console.log(searchProductName);
         if (isExist(parseStore, filteredKeyword[0].name).length) {
           const existData = isExist(parseStore, filteredKeyword[0].name)[0];
           const { name, searchList, searchDetail } = existData;
@@ -189,8 +203,13 @@ const PixelDetails = () => {
       const filteredRegionData = await isMatchRegionData(regionCode);
       const filteredCategory = await isMatchCategory(filteredCodeData[0]);
 
+      if (!filteredCodeData.length) {
+        handleError();
+      }
+
       if (currentStore) {
         const parseStore = JSON.parse(currentStore);
+        // console.log(searchProductName);
         if (isExist(parseStore, filteredCodeData[0].name).length) {
           const existData = isExist(parseStore, filteredCodeData[0].name)[0];
           const { name, searchList, searchDetail } = existData;
@@ -214,7 +233,6 @@ const PixelDetails = () => {
     showAllProducts();
     if (searchProductName) {
       handleStore(searchProductName, type);
-      console.log(searchProductName);
     }
     setTimeout(() => {
       setIsDebounce(true);
@@ -226,7 +244,19 @@ const PixelDetails = () => {
       <Header></Header>
       <DetailSearch>
         <TagWrapper>
-          <KeywordTag>{searchProductName}</KeywordTag>
+          <CurrentKeywordTag>{searchProductName}</CurrentKeywordTag>
+          {currentStore
+            ? JSON.parse(currentStore)
+                .filter((item: any) => item.name !== searchProductName)
+                .map((list: any) => (
+                  <KeywordTag
+                    key={list.name}
+                    onClick={() => setSearchProductName(list.name)}
+                  >
+                    {list.name}
+                  </KeywordTag>
+                ))
+            : ""}
         </TagWrapper>
         <SearchBarWrapper>
           <SearchBar setIsDebounce={setIsDebounce}></SearchBar>
@@ -296,19 +326,37 @@ const DetailSearch = styled.div`
   margin: 0 auto;
 `;
 const TagWrapper = styled.div`
-  width: 40%;
+  width: 30%;
+  margin-right: 20px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  overflow-x: scroll;
 `;
-const SearchBarWrapper = styled.div`
-  width: 60%;
-`;
-const KeywordTag = styled.div`
+
+const CurrentKeywordTag = styled.div`
   padding: 10px 20px;
-  margin: 0 30px;
+  margin-right: 10px;
   font-weight: 600;
   background-color: #6c5ce7;
   color: white;
   border-radius: 5px;
   width: max-content;
+  white-space: nowrap;
+`;
+const KeywordTag = styled.div`
+  padding: 10px 20px;
+  margin-right: 10px;
+  font-weight: 600;
+  background-color: white;
+  color: #6c5ce7;
+  border: solid 1px #6c5ce7;
+  border-radius: 5px;
+  width: max-content;
+  white-space: nowrap;
+`;
+const SearchBarWrapper = styled.div`
+  width: 60%;
 `;
 const MainWrapper = styled.main`
   width: 100vw;
