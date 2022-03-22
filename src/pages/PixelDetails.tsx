@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { Skeleton } from "@mui/material";
 import { getProducts, getRegions } from "api/api";
 import Header from "components/Header";
 import ListItem from "components/ListITem";
@@ -23,7 +24,9 @@ const PixelDetails = () => {
   const location = useLocation().state as locationObj;
   const [products, setProducts] = useState<[] | null>();
   const [pickedProduct, setPickedProduct] = useState<any>();
+  const [isDebounce, setIsDebounce] = useState(false);
   const { keyword, type } = location;
+  const skeletonArray = new Array(20).fill("");
 
   const fetchData = async () => {
     const productsData = await getProducts();
@@ -64,6 +67,9 @@ const PixelDetails = () => {
 
   useEffect(() => {
     showAllProducts();
+    setTimeout(() => {
+      setIsDebounce(true);
+    }, 1000);
   }, [keyword]);
   console.log(products);
   return (
@@ -71,7 +77,7 @@ const PixelDetails = () => {
       <Header></Header>
       <DetailSearch>
         <KeywordTag>{type === "KEYWORD" ? keyword : ""}</KeywordTag>
-        <SearchBar></SearchBar>
+        <SearchBar setIsDebounce={setIsDebounce}></SearchBar>
       </DetailSearch>
       <MainWrapper>
         {type === "URL" && (
@@ -85,15 +91,49 @@ const PixelDetails = () => {
             ))}
           </URLWrapper>
         )}
+        {/* {skeletonArray.map((list, idx) => (
+          <SkeletonWrapper key={idx}>
+            <Skeleton variant="rectangular" width={180} height={230}></Skeleton>
+            <Skeleton
+              variant="rectangular"
+              width={120}
+              height={20}
+              style={{ margin: "10px 0px" }}
+            ></Skeleton>
+            <Skeleton variant="rectangular" width={150} height={20}></Skeleton>
+          </SkeletonWrapper>
+        ))} */}
+
         <GridWrapper>
           <ResultWrapper color={type}>
-            {products?.map((list: productObj) => (
-              <ListItem
-                list={list}
-                size={"100%"}
-                key={list.product_code}
-              ></ListItem>
-            ))}
+            {products && isDebounce
+              ? products?.map((list: productObj) => (
+                  <ListItem
+                    list={list}
+                    size={"100%"}
+                    key={list.product_code}
+                  ></ListItem>
+                ))
+              : skeletonArray.map((list, idx) => (
+                  <SkeletonWrapper key={idx}>
+                    <Skeleton
+                      variant="rectangular"
+                      width={180}
+                      height={230}
+                    ></Skeleton>
+                    <Skeleton
+                      variant="rectangular"
+                      width={150}
+                      height={20}
+                      style={{ margin: "10px 0px" }}
+                    ></Skeleton>
+                    <Skeleton
+                      variant="rectangular"
+                      width={100}
+                      height={20}
+                    ></Skeleton>
+                  </SkeletonWrapper>
+                ))}
           </ResultWrapper>
         </GridWrapper>
       </MainWrapper>
@@ -119,17 +159,15 @@ const KeywordTag = styled.div`
 `;
 const MainWrapper = styled.main`
   width: 100vw;
-  margin: 0 auto;
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: flex-start;
 `;
 const URLWrapper = styled.div`
-  margin: 20px;
+  margin: 20px 0 20px 20px;
 `;
 const GridWrapper = styled.div`
-  margin: 20px 20px 0 0;
-  width: 100%;
+  margin: 20px;
 `;
 const ResultWrapper = styled.div`
   width: 100%;
@@ -153,6 +191,11 @@ const ResultWrapper = styled.div`
   }
   @media (min-width: 1191px) {
     grid-template-columns: ${(props) =>
-      props.color === "KEYWORD" ? "repeat(5, 1fr)" : "repeat(3, 1fr)"};
+      props.color === "KEYWORD" ? "repeat(5, 1fr)" : "repeat(4, 1fr)"};
   }
+`;
+const SkeletonWrapper = styled.div`
+  border: solid 1px #e0e0e0;
+  border-radius: 10px;
+  padding: 10px 10px 40px 10px;
 `;

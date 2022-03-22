@@ -2,7 +2,11 @@ import styled from "@emotion/styled";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const SearchBar = () => {
+interface props {
+  setIsDebounce?: React.Dispatch<React.SetStateAction<boolean>> | undefined;
+}
+
+const SearchBar = ({ setIsDebounce }: props) => {
   const [isWrite, setIsWrite] = useState(false);
 
   const navigate = useNavigate();
@@ -11,11 +15,13 @@ const SearchBar = () => {
     const regExp = /^http[s]?\:\/\//i;
     return regExp.test(strUrl);
   };
-
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isWrite) {
       const currentValue = e.currentTarget.search.value;
+      if (setIsDebounce) {
+        setIsDebounce(false);
+      }
       if (isUrl(currentValue)) {
         navigate(`/pixel/products/image_url=?${currentValue}`, {
           state: {
