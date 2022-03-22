@@ -3,9 +3,10 @@ import { Skeleton } from "@mui/material";
 import { getProducts, getRegions } from "api/api";
 import Header from "components/Header";
 import ListItem from "components/ListITem";
+import RegionItem from "components/RegionItem";
 import SearchBar from "components/SearchBar";
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 
 interface locationObj {
   keyword: string;
@@ -20,11 +21,39 @@ interface productObj {
   category_names: string[];
 }
 
+interface regionObj {
+  product_code: number;
+  region_id: number;
+  image_url: string;
+  gender: string;
+  attributes: [
+    {
+      style: string;
+    },
+    {
+      season: string;
+    },
+    {
+      occasion: string;
+    },
+    {
+      fabric: string;
+    },
+    {
+      sense: string;
+    },
+    {
+      pattern: string;
+    }
+  ];
+  category_names: string[];
+}
 const PixelDetails = () => {
   const location = useLocation().state as locationObj;
   const [products, setProducts] = useState<[] | null>();
-  const [pickedProduct, setPickedProduct] = useState<any>();
   const [isDebounce, setIsDebounce] = useState(false);
+  const [regionData, setRegionData] = useState<[]>();
+  const [searchProductName, setSearchProductName] = useState<string>();
   const { keyword, type } = location;
   const skeletonArray = new Array(20).fill("");
 
@@ -53,15 +82,45 @@ const PixelDetails = () => {
     return filteredCategory;
   };
 
+  const isMatchRegionData = async (code: number) => {
+    const { regionData } = await fetchData();
+    const filteredRegionData = regionData.filter((list: regionObj) => {
+      return list.product_code === code;
+    });
+    return filteredRegionData;
+  };
+
+  const isMatchCode = async (code: number) => {
+    const { productsData } = await fetchData();
+    const filteredCodeData = productsData.filter((list: productObj) => {
+      return list.product_code === code;
+    });
+    return filteredCodeData;
+  };
+
   const showAllProducts = async () => {
-    const filteredKeyword = await isMatchKeyword(keyword);
-    const filteredCategory = await isMatchCategory(filteredKeyword[0]);
     if (type === "KEYWORD") {
+      const filteredKeyword = await isMatchKeyword(keyword);
       setProducts(filteredKeyword);
+      setSearchProductName(keyword);
     }
     if (type === "URL") {
-      setPickedProduct([filteredKeyword[0]]);
+      const filteredKeyword = await isMatchKeyword(keyword);
+      const regionCode = filteredKeyword[0].product_code;
+      const filteredRegionData = await isMatchRegionData(regionCode);
+      const filteredCategory = await isMatchCategory(filteredKeyword[0]);
       setProducts(filteredCategory);
+      setRegionData(filteredRegionData);
+      setSearchProductName(filteredKeyword[0].name);
+    }
+    if (type === "CODE") {
+      const filteredCodeData = await isMatchCode(Number(keyword));
+      const regionCode = filteredCodeData[0].product_code;
+      const filteredRegionData = await isMatchRegionData(regionCode);
+      const filteredCategory = await isMatchCategory(filteredCodeData[0]);
+      setProducts(filteredCategory);
+      setRegionData(filteredRegionData);
+      setSearchProductName(filteredCodeData[0].name);
     }
   };
 
@@ -71,38 +130,31 @@ const PixelDetails = () => {
       setIsDebounce(true);
     }, 1000);
   }, [keyword]);
-  console.log(products);
   return (
     <>
       <Header></Header>
       <DetailSearch>
-        <KeywordTag>{type === "KEYWORD" ? keyword : ""}</KeywordTag>
-        <SearchBar setIsDebounce={setIsDebounce}></SearchBar>
+        <TagWrapper>
+          <KeywordTag>{searchProductName}</KeywordTag>
+        </TagWrapper>
+        <SearchBarWrapper>
+          <SearchBar setIsDebounce={setIsDebounce}></SearchBar>
+        </SearchBarWrapper>
       </DetailSearch>
       <MainWrapper>
-        {type === "URL" && (
+        {type !== "KEYWORD" && isDebounce ? (
           <URLWrapper>
-            {pickedProduct?.map((list: productObj) => (
-              <ListItem
+            {regionData?.map((list, idx) => (
+              <RegionItem
                 list={list}
-                size={"500px"}
-                key={list.product_code}
-              ></ListItem>
+                productName={searchProductName}
+                key={idx}
+              ></RegionItem>
             ))}
           </URLWrapper>
+        ) : (
+          ""
         )}
-        {/* {skeletonArray.map((list, idx) => (
-          <SkeletonWrapper key={idx}>
-            <Skeleton variant="rectangular" width={180} height={230}></Skeleton>
-            <Skeleton
-              variant="rectangular"
-              width={120}
-              height={20}
-              style={{ margin: "10px 0px" }}
-            ></Skeleton>
-            <Skeleton variant="rectangular" width={150} height={20}></Skeleton>
-          </SkeletonWrapper>
-        ))} */}
 
         <GridWrapper>
           <ResultWrapper color={type}>
@@ -145,9 +197,18 @@ export default PixelDetails;
 const Wrapper = styled.section``;
 
 const DetailSearch = styled.div`
+  width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
+  max-width: 1000px;
+  margin: 0 auto;
+`;
+const TagWrapper = styled.div`
+  width: 40%;
+`;
+const SearchBarWrapper = styled.div`
+  width: 60%;
 `;
 const KeywordTag = styled.div`
   padding: 10px 20px;
@@ -156,34 +217,35 @@ const KeywordTag = styled.div`
   background-color: #6c5ce7;
   color: white;
   border-radius: 5px;
+  width: max-content;
 `;
 const MainWrapper = styled.main`
   width: 100vw;
+  max-width: 1500px;
+  margin: 0 auto;
   display: flex;
   justify-content: center;
   align-items: flex-start;
 `;
 const URLWrapper = styled.div`
   margin: 20px 0 20px 20px;
+  width: 40%;
 `;
 const GridWrapper = styled.div`
   margin: 20px;
+  width: 60%;
 `;
 const ResultWrapper = styled.div`
   width: 100%;
   display: grid;
   grid-gap: 20px;
-  min-width: 600px;
-  max-width: 1600px;
 
-  grid-template-columns:
-    repeat(2, 1fr)
-    @media (min-width: 500px) {
+  @media (max-width: 500px) {
     grid-template-columns: repeat(2, 1fr);
   }
   @media (min-width: 501px) and (max-width: 960px) {
     grid-template-columns: ${(props) =>
-      props.color === "KEYWORD" ? "repeat(3, 1fr)" : "repeat(2, 1fr)"};
+      props.color === "KEYWORD" ? "repeat(3, 1fr)" : "repeat(3, 1fr)"};
   }
   @media (min-width: 961px) and (max-width: 1900px) {
     grid-template-columns: ${(props) =>

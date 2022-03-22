@@ -11,9 +11,15 @@ const SearchBar = ({ setIsDebounce }: props) => {
 
   const navigate = useNavigate();
 
-  const isUrl = (strUrl: string) => {
+  const handleInputType = (input: string) => {
     const regExp = /^http[s]?\:\/\//i;
-    return regExp.test(strUrl);
+    if (regExp.test(input)) {
+      return "URL";
+    }
+    if (!isNaN(Number(input))) {
+      return "CODE";
+    }
+    return "KEYWORD";
   };
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -22,18 +28,25 @@ const SearchBar = ({ setIsDebounce }: props) => {
       if (setIsDebounce) {
         setIsDebounce(false);
       }
-      if (isUrl(currentValue)) {
+      if (handleInputType(currentValue) === "URL") {
         navigate(`/pixel/products/image_url=?${currentValue}`, {
           state: {
             keyword: currentValue,
             type: "URL",
           },
         });
-      } else {
+      } else if (handleInputType(currentValue) === "KEYWORD") {
         navigate(`/pixel/products/keyword=?${currentValue}`, {
           state: {
             keyword: currentValue,
             type: "KEYWORD",
+          },
+        });
+      } else if (handleInputType(currentValue) === "CODE") {
+        navigate(`/pixel/products/product_code=?${currentValue}`, {
+          state: {
+            keyword: currentValue,
+            type: "CODE",
           },
         });
       }
@@ -86,7 +99,7 @@ const Input = styled.input`
   box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.3);
 `;
 const Button = styled.button`
-  width: 60px;
+  width: 80px;
   height: 40px;
   margin: 0 20px;
   border: none;
