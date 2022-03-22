@@ -8,7 +8,6 @@ interface props {
 
 const SearchBar = ({ setIsDebounce }: props) => {
   const [isWrite, setIsWrite] = useState(false);
-
   const navigate = useNavigate();
 
   const handleInputType = (input: string) => {

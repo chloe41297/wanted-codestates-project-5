@@ -7,10 +7,11 @@ import RegionItem from "components/RegionItem";
 import SearchBar from "components/SearchBar";
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
+import { json } from "stream/consumers";
 
 interface locationObj {
   keyword: string;
-  type: string;
+  type: "KEYWORD" | "URL" | "CODE";
 }
 
 interface productObj {
@@ -48,12 +49,20 @@ interface regionObj {
   ];
   category_names: string[];
 }
+
+interface Istore {
+  name: string;
+  searchList: [];
+  searchDetail: [];
+}
 const PixelDetails = () => {
   const location = useLocation().state as locationObj;
   const [products, setProducts] = useState<[] | null>();
   const [isDebounce, setIsDebounce] = useState(false);
-  const [regionData, setRegionData] = useState<[]>();
+  const [regionData, setRegionData] = useState<[] | null>();
   const [searchProductName, setSearchProductName] = useState<string>();
+  const localStorage = window.localStorage;
+  const currentStore = localStorage.getItem("searchedStore");
   const { keyword, type } = location;
   const skeletonArray = new Array(20).fill("");
 
@@ -98,38 +107,120 @@ const PixelDetails = () => {
     return filteredCodeData;
   };
 
+  const isExist = (currentStore: [], keyword: string | undefined) => {
+    const existStore = currentStore.filter(
+      (list: Istore) => list.name === keyword
+    ).length
+      ? currentStore.filter((list: Istore) => list.name === keyword)
+      : [];
+
+    return existStore;
+  };
+
+  const handleStore = (
+    keyword: string | undefined,
+    type: "KEYWORD" | "URL" | "CODE"
+  ) => {
+    const storeData = {
+      name: keyword,
+      searchList: products,
+      searchDetail: regionData,
+    };
+    if (currentStore) {
+      const parseStore = JSON.parse(currentStore);
+      if (!isExist(parseStore, keyword)) {
+        localStorage.setItem(
+          "searchedStore",
+          JSON.stringify([...parseStore, storeData])
+        );
+      }
+    } else {
+      localStorage.setItem("searchedStore", JSON.stringify([storeData]));
+    }
+  };
+
   const showAllProducts = async () => {
     if (type === "KEYWORD") {
       const filteredKeyword = await isMatchKeyword(keyword);
-      setProducts(filteredKeyword);
-      setSearchProductName(keyword);
+      if (currentStore) {
+        const parseStore = JSON.parse(currentStore);
+        if (isExist(parseStore, keyword).length) {
+          const existData = isExist(parseStore, keyword)[0];
+          const { name, searchList } = existData;
+          setProducts(searchList);
+          setSearchProductName(name);
+        } else {
+          setProducts(filteredKeyword);
+          setSearchProductName(keyword);
+        }
+      } else {
+        setProducts(filteredKeyword);
+        setSearchProductName(keyword);
+      }
     }
     if (type === "URL") {
       const filteredKeyword = await isMatchKeyword(keyword);
       const regionCode = filteredKeyword[0].product_code;
       const filteredRegionData = await isMatchRegionData(regionCode);
       const filteredCategory = await isMatchCategory(filteredKeyword[0]);
-      setProducts(filteredCategory);
-      setRegionData(filteredRegionData);
-      setSearchProductName(filteredKeyword[0].name);
+
+      if (currentStore) {
+        const parseStore = JSON.parse(currentStore);
+        if (isExist(parseStore, filteredKeyword[0].name).length) {
+          const existData = isExist(parseStore, filteredKeyword[0].name)[0];
+          const { name, searchList, searchDetail } = existData;
+          setProducts(searchList);
+          setRegionData(searchDetail);
+          setSearchProductName(name);
+        } else {
+          setProducts(filteredCategory);
+          setRegionData(filteredRegionData);
+          setSearchProductName(filteredKeyword[0].name);
+        }
+      } else {
+        setProducts(filteredCategory);
+        setRegionData(filteredRegionData);
+        setSearchProductName(filteredKeyword[0].name);
+      }
     }
     if (type === "CODE") {
       const filteredCodeData = await isMatchCode(Number(keyword));
       const regionCode = filteredCodeData[0].product_code;
       const filteredRegionData = await isMatchRegionData(regionCode);
       const filteredCategory = await isMatchCategory(filteredCodeData[0]);
-      setProducts(filteredCategory);
-      setRegionData(filteredRegionData);
-      setSearchProductName(filteredCodeData[0].name);
+
+      if (currentStore) {
+        const parseStore = JSON.parse(currentStore);
+        if (isExist(parseStore, filteredCodeData[0].name).length) {
+          const existData = isExist(parseStore, filteredCodeData[0].name)[0];
+          const { name, searchList, searchDetail } = existData;
+          setProducts(searchList);
+          setRegionData(searchDetail);
+          setSearchProductName(name);
+        } else {
+          setProducts(filteredCategory);
+          setRegionData(filteredRegionData);
+          setSearchProductName(filteredCodeData[0].name);
+        }
+      } else {
+        setProducts(filteredCategory);
+        setRegionData(filteredRegionData);
+        setSearchProductName(filteredCodeData[0].name);
+      }
     }
   };
 
   useEffect(() => {
     showAllProducts();
+    if (searchProductName) {
+      handleStore(searchProductName, type);
+      console.log(searchProductName);
+    }
     setTimeout(() => {
       setIsDebounce(true);
     }, 1000);
-  }, [keyword]);
+  }, [keyword, searchProductName]);
+
   return (
     <>
       <Header></Header>
