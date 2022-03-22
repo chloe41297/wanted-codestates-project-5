@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { getProducts, getRegions } from "api/api";
 import Header from "components/Header";
+import ListItem from "components/ListITem";
 import SearchBar from "components/SearchBar";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -69,37 +70,32 @@ const PixelDetails = () => {
     <>
       <Header></Header>
       <DetailSearch>
-        <KeywordTag>
-          {type === "keyword" ? keyword : pickedProduct[0]?.name}
-        </KeywordTag>
+        <KeywordTag>{type === "KEYWORD" ? keyword : ""}</KeywordTag>
         <SearchBar></SearchBar>
       </DetailSearch>
       <MainWrapper>
         {type === "URL" && (
           <URLWrapper>
             {pickedProduct?.map((list: productObj) => (
-              <Item key={list.product_code}>
-                <ImgWrapper>
-                  <Img src={list.image_url}></Img>
-                </ImgWrapper>
-                <ItemName>{list.name}</ItemName>
-                <ItemPrice> ₩{list.price.toLocaleString()}</ItemPrice>
-              </Item>
+              <ListItem
+                list={list}
+                size={"500px"}
+                key={list.product_code}
+              ></ListItem>
             ))}
           </URLWrapper>
         )}
-
-        <ResultWrapper>
-          {products?.map((list: productObj) => (
-            <Item key={list.product_code}>
-              <ImgWrapper>
-                <Img src={list.image_url}></Img>
-              </ImgWrapper>
-              <ItemName>{list.name}</ItemName>
-              <ItemPrice> ₩{list.price.toLocaleString()}</ItemPrice>
-            </Item>
-          ))}
-        </ResultWrapper>
+        <GridWrapper>
+          <ResultWrapper color={type}>
+            {products?.map((list: productObj) => (
+              <ListItem
+                list={list}
+                size={"100%"}
+                key={list.product_code}
+              ></ListItem>
+            ))}
+          </ResultWrapper>
+        </GridWrapper>
       </MainWrapper>
     </>
   );
@@ -122,64 +118,41 @@ const KeywordTag = styled.div`
   border-radius: 5px;
 `;
 const MainWrapper = styled.main`
+  width: 100vw;
+  margin: 0 auto;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: flex-start;
 `;
 const URLWrapper = styled.div`
-  width: 20%;
-  position: fixed;
-  top: 300px;
-  left: 20px;
+  margin: 20px;
+`;
+const GridWrapper = styled.div`
+  margin: 20px 20px 0 0;
+  width: 100%;
 `;
 const ResultWrapper = styled.div`
-  width: calc(100% - 80px);
-  margin: 20px 40px;
+  width: 100%;
   display: grid;
   grid-gap: 20px;
   min-width: 600px;
   max-width: 1600px;
-  grid-template-columns: repeat(3, 1fr);
-  @media (min-width: 767px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  @media (min-width: 768px) and (max-width: 999px) {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  @media (min-width: 1000px) {
-    grid-template-columns: repeat(6, 1fr);
-    margin: 20px auto;
-  }
-`;
-const Item = styled.div`
-  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);
-  border-radius: 10px;
-  overflow: hidden;
-`;
 
-const ImgWrapper = styled.div`
-  width: 100%;
-  height: 70%;
-  overflow: hidden;
-`;
-const Img = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease-in-out;
-  :hover {
-    transform: scale(1.1);
+  grid-template-columns:
+    repeat(2, 1fr)
+    @media (min-width: 500px) {
+    grid-template-columns: repeat(2, 1fr);
   }
-`;
-const ItemName = styled.div`
-  font-size: 18px;
-  font-weight: 700;
-  padding: 10px;
-`;
-const ItemPrice = styled.div`
-  font-size: 18px;
-  color: #6c5ce7;
-  font-weight: 600;
-  text-align: end;
-  padding: 10px;
+  @media (min-width: 501px) and (max-width: 960px) {
+    grid-template-columns: ${(props) =>
+      props.color === "KEYWORD" ? "repeat(3, 1fr)" : "repeat(2, 1fr)"};
+  }
+  @media (min-width: 961px) and (max-width: 1900px) {
+    grid-template-columns: ${(props) =>
+      props.color === "KEYWORD" ? "repeat(4, 1fr)" : "repeat(3, 1fr)"};
+  }
+  @media (min-width: 1191px) {
+    grid-template-columns: ${(props) =>
+      props.color === "KEYWORD" ? "repeat(5, 1fr)" : "repeat(3, 1fr)"};
+  }
 `;
