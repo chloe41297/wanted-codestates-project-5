@@ -105,4 +105,5 @@ const Button = styled.button`
   border-radius: 5px;
   font-weight: 700;
   font-size: 16px;
+  white-space: nowrap;
 `;

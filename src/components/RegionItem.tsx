@@ -34,7 +34,12 @@ interface regionObj {
 const RegionItem = ({ list, productName }: regionObj) => {
   return (
     <ItemWrapper>
-      <Img src={list.image_url}></Img>
+      <Img
+        src={list.image_url}
+        onClick={() => {
+          window.open(`${list.image_url}`);
+        }}
+      ></Img>
       <Title>ITEMS</Title>
       <ProductName>{productName}</ProductName>
       <Title style={{ borderTop: "solid 1px #e0e0e0" }}>ATTRIBUTES</Title>
@@ -64,6 +69,9 @@ const ItemWrapper = styled.div`
 `;
 const Img = styled.img`
   width: 100%;
+  :hover {
+    cursor: pointer;
+  }
 `;
 const Title = styled.div`
   font-size: 20px;

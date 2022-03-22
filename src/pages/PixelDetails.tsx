@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { Skeleton } from "@mui/material";
+import { Pagination, Skeleton } from "@mui/material";
 import { getProducts, getRegions } from "api/api";
 import Header from "components/Header";
 import ListItem from "components/ListITem";
@@ -56,15 +56,19 @@ interface Istore {
 }
 const PixelDetails = () => {
   const location = useLocation().state as locationObj;
-  const [products, setProducts] = useState<[]>();
+  const [products, setProducts] = useState<any>();
   const [isDebounce, setIsDebounce] = useState(false);
   const [regionData, setRegionData] = useState<[] | null>();
   const [searchProductName, setSearchProductName] = useState<string>();
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [showProducts, setShowProducts] = useState<any>();
+  const [maxPagination, setMaxPagination] = useState<number>(5);
   const localStorage = window.localStorage;
   const currentStore = localStorage.getItem("searchedStore");
   const { keyword, type } = location;
   const skeletonArray = new Array(20).fill("");
   const navigate = useNavigate();
+  const MAXPAGE = 20;
 
   const fetchData = async () => {
     const productsData = await getProducts();
@@ -152,7 +156,6 @@ const PixelDetails = () => {
       }
       if (currentStore) {
         const parseStore = JSON.parse(currentStore);
-        // console.log(searchProductName);
         if (isExist(parseStore, keyword).length) {
           const existData = isExist(parseStore, keyword)[0];
           const { name, searchList } = existData;
@@ -179,7 +182,7 @@ const PixelDetails = () => {
 
       if (currentStore) {
         const parseStore = JSON.parse(currentStore);
-        // console.log(searchProductName);
+
         if (isExist(parseStore, filteredKeyword[0].name).length) {
           const existData = isExist(parseStore, filteredKeyword[0].name)[0];
           const { name, searchList, searchDetail } = existData;
@@ -209,7 +212,7 @@ const PixelDetails = () => {
 
       if (currentStore) {
         const parseStore = JSON.parse(currentStore);
-        // console.log(searchProductName);
+
         if (isExist(parseStore, filteredCodeData[0].name).length) {
           const existData = isExist(parseStore, filteredCodeData[0].name)[0];
           const { name, searchList, searchDetail } = existData;
@@ -229,15 +232,33 @@ const PixelDetails = () => {
     }
   };
 
+  const handlePagination = (
+    event: React.ChangeEvent<unknown>,
+    page: number
+  ) => {
+    setCurrentPage(page);
+  };
+
   useEffect(() => {
+    setCurrentPage(1);
     showAllProducts();
+
     if (searchProductName) {
       handleStore(searchProductName, type);
     }
+
     setTimeout(() => {
       setIsDebounce(true);
     }, 1000);
   }, [keyword, searchProductName]);
+
+  useEffect(() => {
+    setShowProducts(
+      products?.slice(MAXPAGE * (currentPage - 1), MAXPAGE * currentPage)
+    );
+
+    setMaxPagination(Math.ceil(products?.length / MAXPAGE));
+  }, [currentPage, products]);
 
   return (
     <>
@@ -279,8 +300,8 @@ const PixelDetails = () => {
 
         <GridWrapper>
           <ResultWrapper color={type}>
-            {products && isDebounce
-              ? products?.map((list: productObj) => (
+            {showProducts && isDebounce
+              ? showProducts?.map((list: productObj) => (
                   <ListItem
                     list={list}
                     size={"100%"}
@@ -310,6 +331,15 @@ const PixelDetails = () => {
           </ResultWrapper>
         </GridWrapper>
       </MainWrapper>
+      <PaginationWrapper>
+        <Pagination
+          count={maxPagination}
+          page={currentPage}
+          size="large"
+          color="secondary"
+          onChange={handlePagination}
+        ></Pagination>
+      </PaginationWrapper>
     </>
   );
 };
@@ -323,10 +353,10 @@ const DetailSearch = styled.div`
   justify-content: center;
   align-items: center;
   max-width: 1000px;
-  margin: 0 auto;
+  margin: 20px auto 0 auto;
 `;
 const TagWrapper = styled.div`
-  width: 30%;
+  width: 60%;
   margin-right: 20px;
   display: flex;
   justify-content: flex-start;
@@ -356,7 +386,7 @@ const KeywordTag = styled.div`
   white-space: nowrap;
 `;
 const SearchBarWrapper = styled.div`
-  width: 60%;
+  width: 40%;
 `;
 const MainWrapper = styled.main`
   width: 100vw;
@@ -399,4 +429,11 @@ const SkeletonWrapper = styled.div`
   border: solid 1px #e0e0e0;
   border-radius: 10px;
   padding: 10px 10px 40px 10px;
+`;
+const PaginationWrapper = styled.div`
+  width: 100vw;
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;

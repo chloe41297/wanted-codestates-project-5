@@ -17,7 +17,12 @@ const ListItem = ({ list, size }: listObj) => {
     <>
       <Item style={{ width: `${size}` }}>
         <ImgWrapper>
-          <Img src={list.image_url}></Img>
+          <Img
+            src={list.image_url}
+            onClick={() => {
+              window.open(`${list.image_url}`);
+            }}
+          ></Img>
         </ImgWrapper>
         <ItemName>{list.name}</ItemName>
         <ItemPrice> ₩{list.price.toLocaleString()}</ItemPrice>
@@ -39,12 +44,16 @@ const ImgWrapper = styled.div`
   width: 100%;
   height: 250px;
   overflow: hidden;
+  :hover {
+    filter: brightness(90%);
+    cursor: pointer;
+  }
 `;
 const Img = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
   :hover {
     transform: scale(1.1);
   }
