@@ -74,17 +74,18 @@ const Canvas = () => {
 
   // 저장된 dragg 보여줌
   useEffect(() => {
-    dragged.map((list: any) => {
-      const [startX, startY, endX, endY] = list?.position;
-      if (showCtx) {
+    if (showCtx) {
+      showCtx.clearRect(0, 0, 800, 1000);
+      dragged.map((list: any) => {
+        const [startX, startY, endX, endY] = list?.position;
+
         showCtx.lineWidth = 3;
         showCtx.fillStyle = "rgb(29, 209, 161,0.2)";
         showCtx.strokeStyle = "rgb(29, 209, 161)";
-        // showCtx.clearRect(0, 0, 800, 1000);
         showCtx.fillRect(startX, startY, endX - startX, endY - startY);
         showCtx.strokeRect(startX, startY, endX - startX, endY - startY);
-      }
-    });
+      });
+    }
   }, [dragged]);
 
   // canvas 위치 알아내기
@@ -137,17 +138,40 @@ const Canvas = () => {
 
   return (
     <Main>
-      <CanvasBase
-        width="800"
-        height="1000"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseLeave}
-        id="draw"
-      ></CanvasBase>
-      <CanvasShow width="800" height="1000" id="show"></CanvasShow>
-      <Img src="https://s3.us-west-2.amazonaws.com/secure.notion-static.com/451a2619-a21b-462d-bb59-a50196e3057a/fashion-unsplash.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220323%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220323T084142Z&X-Amz-Expires=86400&X-Amz-Signature=d4f144583d56f8537c0699aa9319330e3a0ac68987a567f0d13c51b460164e7c&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22fashion-unsplash.jpg%22&x-id=GetObject"></Img>
+      <Wrapper>
+        <ItemList>
+          {dragged &&
+            dragged.map((list: any, idx: number) => (
+              <li key={idx}>{list.name}</li>
+            ))}
+        </ItemList>
+        <CanvasBase
+          width="800"
+          height="1000"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+          id="draw"
+        ></CanvasBase>
+        <CanvasShow width="800" height="1000" id="show"></CanvasShow>
+        <Img src="https://s3.us-west-2.amazonaws.com/secure.notion-static.com/451a2619-a21b-462d-bb59-a50196e3057a/fashion-unsplash.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220323%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220323T084142Z&X-Amz-Expires=86400&X-Amz-Signature=d4f144583d56f8537c0699aa9319330e3a0ac68987a567f0d13c51b460164e7c&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22fashion-unsplash.jpg%22&x-id=GetObject"></Img>
+
+        {dragged &&
+          dragged.map((list: any, idx: number) => (
+            <div
+              key={idx}
+              style={{
+                position: "absolute",
+                top: `${list.position[1]}px`,
+                left: `${list.position[0]}px`,
+                zIndex: "200",
+              }}
+            >
+              {list.name}
+            </div>
+          ))}
+      </Wrapper>
     </Main>
   );
 };
@@ -155,13 +179,31 @@ export default Canvas;
 
 const Main = styled.main`
   width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const Wrapper = styled.section`
   position: relative;
+  width: 800px;
+  height: 1000px;
+`;
+const ItemList = styled.ul`
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  margin: 0;
+  z-index: 250;
+  background-color: white;
+  padding: 10px;
 `;
 
 const CanvasBase = styled.canvas`
   position: absolute;
-  left: calc(50% - 400px);
-  top: 100px;
+  left: 0px;
+  top: 0px;
   width: 800px;
   height: 1000px;
   display: block;
@@ -172,8 +214,8 @@ const CanvasBase = styled.canvas`
 
 const CanvasShow = styled.canvas`
   position: absolute;
-  left: calc(50% - 400px);
-  top: 100px;
+  left: 0px;
+  top: 0px;
   width: 800px;
   height: 1000px;
   display: block;
@@ -184,6 +226,6 @@ const CanvasShow = styled.canvas`
 const Img = styled.img`
   position: absolute;
   width: 800px;
-  top: 100px;
-  left: calc(50% - 400px);
+  left: 0px;
+  top: 0px;
 `;
