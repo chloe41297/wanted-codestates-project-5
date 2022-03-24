@@ -1,5 +1,4 @@
 import styled from "@emotion/styled";
-import { Skeleton } from "@mui/material";
 
 interface listObj {
   list: {
