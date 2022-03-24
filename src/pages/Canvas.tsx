@@ -8,6 +8,7 @@ const Canvas = () => {
   const [isMouseUp, setIsMouseUp] = useState(true);
   const [resize, setResize] = useState<number[]>([0, 0]);
   const [dragged, setDragged] = useState<any>([]);
+  const [isChecked, setIsChecked] = useState<number[]>([]);
   const drawCanvas: HTMLCanvasElement = document.getElementById(
     "draw"
   ) as HTMLCanvasElement;
@@ -93,20 +94,43 @@ const Canvas = () => {
     setResize([window.innerWidth, window.innerHeight]);
   }, 800);
 
+  const handleCheck = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    idx: number,
+    list: any
+  ) => {
+    if (showCtx) {
+      if (!isChecked.includes(idx)) {
+        setIsChecked([...isChecked, idx]);
+      } else if (isChecked.includes(idx)) {
+        const currentChecked = isChecked;
+        setIsChecked([...currentChecked.filter((number) => number !== idx)]);
+      }
+    }
+  };
+
   // 저장된 dragg 보여줌
   useEffect(() => {
     if (showCtx) {
       showCtx.clearRect(0, 0, 800, 1000);
-      dragged.map((list: any) => {
+      dragged.map((list: any, idx: number) => {
         const [startX, startY, endX, endY] = list?.position;
-        showCtx.lineWidth = 3;
-        showCtx.fillStyle = "rgb(29, 209, 161,0.2)";
-        showCtx.strokeStyle = "rgb(29, 209, 161)";
-        showCtx.fillRect(startX, startY, endX - startX, endY - startY);
-        showCtx.strokeRect(startX, startY, endX - startX, endY - startY);
+        if (isChecked.includes(idx)) {
+          showCtx.lineWidth = 3;
+          showCtx.fillStyle = "rgb(253, 203, 110,0.2)";
+          showCtx.strokeStyle = "rgb(253, 203, 110)";
+          showCtx.fillRect(startX, startY, endX - startX, endY - startY);
+          showCtx.strokeRect(startX, startY, endX - startX, endY - startY);
+        } else if (!isChecked.includes(idx)) {
+          showCtx.lineWidth = 3;
+          showCtx.fillStyle = "rgb(29, 209, 161,0.2)";
+          showCtx.strokeStyle = "rgb(29, 209, 161)";
+          showCtx.fillRect(startX, startY, endX - startX, endY - startY);
+          showCtx.strokeRect(startX, startY, endX - startX, endY - startY);
+        }
       });
     }
-  }, [dragged]);
+  }, [dragged, isChecked]);
   // canvas 위치 알아내기
   useEffect(() => {
     const drawCanvas: HTMLCanvasElement = document.getElementById(
@@ -158,7 +182,6 @@ const Canvas = () => {
       );
     }
   }, [startMouse[0], startMouse[1], endMouse[0], endMouse[1]]);
-
   return (
     <Main>
       <Wrapper>
@@ -166,7 +189,14 @@ const Canvas = () => {
           {dragged &&
             dragged.map((list: any, idx: number) => (
               <Item key={idx}>
-                <ItemDiv>{list.name}</ItemDiv>
+                <ItemDiv>
+                  <input
+                    type="checkbox"
+                    checked={isChecked.includes(idx)}
+                    onChange={(e) => handleCheck(e, idx, list)}
+                  ></input>
+                  {list.name}
+                </ItemDiv>
                 <ItemIconsWrapper>
                   <ItemIcon onClick={() => handleEdit(idx, list)}>✏️</ItemIcon>
                   <ItemIcon onClick={() => handleDelete(idx)}>🗑</ItemIcon>
@@ -192,8 +222,16 @@ const Canvas = () => {
               key={idx}
               style={{
                 position: "absolute",
-                top: `${list.position[1]}px`,
-                left: `${list.position[0]}px`,
+                top: `${
+                  list.position[1] >= list.position[3]
+                    ? list.position[3]
+                    : list.position[1]
+                }px`,
+                left: `${
+                  list.position[0] >= list.position[2]
+                    ? list.position[2]
+                    : list.position[0]
+                }px`,
                 zIndex: "200",
               }}
             >
@@ -236,11 +274,6 @@ const Item = styled.li`
 `;
 const ItemDiv = styled.div`
   font-size: 18px;
-  :before {
-    content: "✅";
-    font-size: 14px;
-    padding-right: 10px;
-  }
 `;
 const ItemIconsWrapper = styled.div`
   display: flex;
