@@ -131,6 +131,7 @@ const Canvas = () => {
           showCtx.fillRect(startX, startY, endX - startX, endY - startY);
           showCtx.strokeRect(startX, startY, endX - startX, endY - startY);
         }
+        return;
       });
     }
   }, [dragged, isChecked]);
