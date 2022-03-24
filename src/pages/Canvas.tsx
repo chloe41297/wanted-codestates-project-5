@@ -68,6 +68,26 @@ const Canvas = () => {
     setIsMouseUp(true);
   };
 
+  const handleEdit = (
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    idx: number,
+    list: any
+  ) => {
+    const current = dragged;
+    const editName = prompt("수정한 영역의 이름은 무엇인가요?", `${list.name}`);
+    current.splice(idx, 1, { name: editName, position: list.position });
+    setDragged([...current]);
+  };
+
+  const handleDelete = (
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    idx: number
+  ) => {
+    const current = dragged;
+    current.splice(idx, 1);
+    setDragged([...current]);
+  };
+
   const handleResize = debounce(() => {
     setResize([window.innerWidth, window.innerHeight]);
   }, 800);
@@ -78,7 +98,6 @@ const Canvas = () => {
       showCtx.clearRect(0, 0, 800, 1000);
       dragged.map((list: any) => {
         const [startX, startY, endX, endY] = list?.position;
-
         showCtx.lineWidth = 3;
         showCtx.fillStyle = "rgb(29, 209, 161,0.2)";
         showCtx.strokeStyle = "rgb(29, 209, 161)";
@@ -87,7 +106,6 @@ const Canvas = () => {
       });
     }
   }, [dragged]);
-
   // canvas 위치 알아내기
   useEffect(() => {
     const drawCanvas: HTMLCanvasElement = document.getElementById(
@@ -142,7 +160,17 @@ const Canvas = () => {
         <ItemList>
           {dragged &&
             dragged.map((list: any, idx: number) => (
-              <li key={idx}>{list.name}</li>
+              <Item key={idx}>
+                <ItemDiv>{list.name}</ItemDiv>
+                <ItemIconsWrapper>
+                  <ItemIcon onClick={(event) => handleEdit(event, idx, list)}>
+                    ✏️
+                  </ItemIcon>
+                  <ItemIcon onClick={(event) => handleDelete(event, idx)}>
+                    🗑
+                  </ItemIcon>
+                </ItemIconsWrapper>
+              </Item>
             ))}
         </ItemList>
         <CanvasBase
@@ -179,7 +207,6 @@ export default Canvas;
 
 const Main = styled.main`
   width: 100vw;
-  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -198,6 +225,33 @@ const ItemList = styled.ul`
   z-index: 250;
   background-color: white;
   padding: 10px;
+  border-radius: 10px;
+`;
+const Item = styled.li`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+`;
+const ItemDiv = styled.div`
+  font-size: 18px;
+  :before {
+    content: "✅";
+    font-size: 14px;
+    padding-right: 10px;
+  }
+`;
+const ItemIconsWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+const ItemIcon = styled.div`
+  font-size: 13px;
+  padding: 0 5px;
+  :hover {
+    cursor: pointer;
+  }
 `;
 
 const CanvasBase = styled.canvas`
