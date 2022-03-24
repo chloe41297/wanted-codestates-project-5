@@ -20,6 +20,7 @@ const Canvas = () => {
     drawCanvas?.getBoundingClientRect().x,
     drawCanvas?.getBoundingClientRect().y,
   ]);
+  const localStorage = window.localStorage;
 
   const handleMouseDown = (
     event: React.MouseEvent<HTMLCanvasElement, MouseEvent>
@@ -41,9 +42,7 @@ const Canvas = () => {
     ]);
   };
 
-  const handleMouseUp = (
-    event: React.MouseEvent<HTMLCanvasElement, MouseEvent>
-  ) => {
+  const handleMouseUp = () => {
     setIsMouseUp(true);
     const mainPrompt = prompt("영역의 이름은 무엇인가요?", "");
     if (mainPrompt) {
@@ -54,38 +53,40 @@ const Canvas = () => {
           position: [startMouse[0], startMouse[1], endMouse[0], endMouse[1]],
         },
       ]);
-
       drawCtx?.clearRect(0, 0, 800, 1000);
+      localStorage.setItem(
+        "canvasItem",
+        JSON.stringify([
+          ...dragged,
+          {
+            name: mainPrompt,
+            position: [startMouse[0], startMouse[1], endMouse[0], endMouse[1]],
+          },
+        ])
+      );
     }
   };
 
-  const handleMouseLeave = (
-    event: React.MouseEvent<HTMLCanvasElement, MouseEvent>
-  ) => {
+  const handleMouseLeave = () => {
     if (!isMouseUp) {
       drawCtx?.clearRect(0, 0, 800, 1000);
     }
     setIsMouseUp(true);
   };
 
-  const handleEdit = (
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>,
-    idx: number,
-    list: any
-  ) => {
+  const handleEdit = (idx: number, list: any) => {
     const current = dragged;
     const editName = prompt("수정한 영역의 이름은 무엇인가요?", `${list.name}`);
     current.splice(idx, 1, { name: editName, position: list.position });
     setDragged([...current]);
+    localStorage.setItem("canvasItem", JSON.stringify([...current]));
   };
 
-  const handleDelete = (
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>,
-    idx: number
-  ) => {
+  const handleDelete = (idx: number) => {
     const current = dragged;
     current.splice(idx, 1);
     setDragged([...current]);
+    localStorage.setItem("canvasItem", JSON.stringify([...current]));
   };
 
   const handleResize = debounce(() => {
@@ -119,6 +120,10 @@ const Canvas = () => {
 
   // window resize 알아내기
   useEffect(() => {
+    if (localStorage.getItem("canvasItem")) {
+      const storeData = localStorage.getItem("canvasItem") as any;
+      setDragged([...JSON.parse(storeData)]);
+    }
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -163,12 +168,8 @@ const Canvas = () => {
               <Item key={idx}>
                 <ItemDiv>{list.name}</ItemDiv>
                 <ItemIconsWrapper>
-                  <ItemIcon onClick={(event) => handleEdit(event, idx, list)}>
-                    ✏️
-                  </ItemIcon>
-                  <ItemIcon onClick={(event) => handleDelete(event, idx)}>
-                    🗑
-                  </ItemIcon>
+                  <ItemIcon onClick={() => handleEdit(idx, list)}>✏️</ItemIcon>
+                  <ItemIcon onClick={() => handleDelete(idx)}>🗑</ItemIcon>
                 </ItemIconsWrapper>
               </Item>
             ))}
@@ -262,7 +263,7 @@ const CanvasBase = styled.canvas`
   height: 1000px;
   display: block;
   box-sizing: border-box;
-  border: solid 1px black;
+
   z-index: 100;
 `;
 
@@ -274,7 +275,6 @@ const CanvasShow = styled.canvas`
   height: 1000px;
   display: block;
   box-sizing: border-box;
-  border: solid 2px red;
   z-index: 50;
 `;
 const Img = styled.img`
