@@ -261,7 +261,7 @@ const PixelDetails = () => {
   }, [currentPage, products]);
 
   return (
-    <>
+    <Wrapper>
       <Header></Header>
       <DetailSearch>
         <TagWrapper>
@@ -340,7 +340,7 @@ const PixelDetails = () => {
           onChange={handlePagination}
         ></Pagination>
       </PaginationWrapper>
-    </>
+    </Wrapper>
   );
 };
 export default PixelDetails;

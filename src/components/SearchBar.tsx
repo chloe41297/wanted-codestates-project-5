@@ -11,7 +11,7 @@ const SearchBar = ({ setIsDebounce }: props) => {
   const navigate = useNavigate();
 
   const handleInputType = (input: string) => {
-    const regExp = /^http[s]?\:\/\//i;
+    const regExp = /^http[s]?:\/\//i;
     if (regExp.test(input)) {
       return "URL";
     }

@@ -116,7 +116,7 @@ const Canvas = () => {
   useEffect(() => {
     if (showCtx) {
       showCtx.clearRect(0, 0, 800, 1000);
-      dragged.map((list: any, idx: number) => {
+      dragged.forEach((list: any, idx: number) => {
         const [startX, startY, endX, endY] = list?.position;
         if (isChecked.includes(idx)) {
           showCtx.lineWidth = 3;
@@ -131,7 +131,6 @@ const Canvas = () => {
           showCtx.fillRect(startX, startY, endX - startX, endY - startY);
           showCtx.strokeRect(startX, startY, endX - startX, endY - startY);
         }
-        return;
       });
     }
   }, [dragged, isChecked]);
