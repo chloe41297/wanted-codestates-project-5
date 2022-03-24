@@ -46,6 +46,7 @@ const Canvas = () => {
   const handleMouseUp = () => {
     setIsMouseUp(true);
     const mainPrompt = prompt("영역의 이름은 무엇인가요?", "");
+
     if (mainPrompt) {
       setDragged([
         ...dragged,
@@ -65,6 +66,8 @@ const Canvas = () => {
           },
         ])
       );
+    } else {
+      drawCtx?.clearRect(0, 0, 800, 1000);
     }
   };
 
