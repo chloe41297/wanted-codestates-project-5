@@ -1,24 +1,25 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import "./App.css";
+import PixelMain from "./pages/PixelMain";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import PixelDetails from "pages/PixelDetails";
+import Home from "pages/Home";
+import Canvas from "pages/Canvas";
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home></Home>}></Route>
+          <Route path="/canvas" element={<Canvas></Canvas>}></Route>
+          <Route path="/pixel" element={<PixelMain></PixelMain>}></Route>
+          <Route
+            path="/pixel/products/:keyword"
+            element={<PixelDetails></PixelDetails>}
+          ></Route>
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }
