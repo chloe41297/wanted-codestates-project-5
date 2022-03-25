@@ -1,10 +1,11 @@
 import React from "react";
 import "./App.css";
 import PixelMain from "./pages/PixelMain";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import PixelDetails from "pages/PixelDetails";
 import Home from "pages/Home";
 import Canvas from "pages/Canvas";
+import styled from "@emotion/styled";
 
 function App() {
   return (

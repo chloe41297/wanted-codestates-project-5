@@ -1,11 +1,13 @@
 import styled from "@emotion/styled";
 import Header from "components/Header";
+import MainButton from "components/MainButton";
 import SearchBar from "../components/SearchBar";
 
 const PixelMain = () => {
   return (
     <>
       <Header></Header>
+      <MainButton></MainButton>
       <Main>
         <MainCopy>
           <strong>Artificial Intelligence </strong>

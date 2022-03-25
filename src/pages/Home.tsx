@@ -14,6 +14,16 @@ const Home = () => {
           <Square3 id="square3"></Square3>
         </Section>
       </Link>
+      <Link to="/canvas" style={{ textDecoration: "none" }}>
+        <Section>
+          <Title>
+            CANVAS <br /> 바로가기
+          </Title>
+          <Square1 id="square1"></Square1>
+          <Square2 id="square2"></Square2>
+          <Square3 id="square3"></Square3>
+        </Section>
+      </Link>
     </Main>
   );
 };
