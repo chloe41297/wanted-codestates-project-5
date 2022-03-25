@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { useEffect, useState } from "react";
 import { debounce } from "lodash";
+import MainButton from "components/MainButton";
 
 const Canvas = () => {
   const [startMouse, setStartMouse] = useState<number[] | null[]>([null, null]);
@@ -22,7 +23,6 @@ const Canvas = () => {
     drawCanvas?.getBoundingClientRect().y,
   ]);
   const localStorage = window.localStorage;
-
   const handleMouseDown = (
     event: React.MouseEvent<HTMLCanvasElement, MouseEvent>
   ) => {
@@ -144,7 +144,6 @@ const Canvas = () => {
       drawCanvas?.getBoundingClientRect().y,
     ]);
   }, [resize]);
-
   // window resize 알아내기
   useEffect(() => {
     if (localStorage.getItem("canvasItem")) {
@@ -187,6 +186,7 @@ const Canvas = () => {
   }, [startMouse[0], startMouse[1], endMouse[0], endMouse[1]]);
   return (
     <Main>
+      <MainButton></MainButton>
       <Wrapper>
         <ItemList>
           {dragged &&
@@ -217,7 +217,7 @@ const Canvas = () => {
           id="draw"
         ></CanvasBase>
         <CanvasShow width="800" height="1000" id="show"></CanvasShow>
-        <Img src="https://s3.us-west-2.amazonaws.com/secure.notion-static.com/451a2619-a21b-462d-bb59-a50196e3057a/fashion-unsplash.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220323%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220323T084142Z&X-Amz-Expires=86400&X-Amz-Signature=d4f144583d56f8537c0699aa9319330e3a0ac68987a567f0d13c51b460164e7c&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22fashion-unsplash.jpg%22&x-id=GetObject"></Img>
+        <Img src="https://s3.us-west-2.amazonaws.com/secure.notion-static.com/451a2619-a21b-462d-bb59-a50196e3057a/fashion-unsplash.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220324%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220324T153745Z&X-Amz-Expires=86400&X-Amz-Signature=f31a78b4fe167048a5f8ee5d252727d9571f72b107919b3f28aed4e66164ed95&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22fashion-unsplash.jpg%22&x-id=GetObject"></Img>
 
         {dragged &&
           dragged.map((list: any, idx: number) => (

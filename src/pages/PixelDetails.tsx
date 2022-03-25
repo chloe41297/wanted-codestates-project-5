@@ -3,6 +3,7 @@ import { Pagination, Skeleton } from "@mui/material";
 import { getProducts, getRegions } from "api/api";
 import Header from "components/Header";
 import ListItem from "components/ListITem";
+import MainButton from "components/MainButton";
 import RegionItem from "components/RegionItem";
 import SearchBar from "components/SearchBar";
 import { useEffect, useState } from "react";
@@ -263,6 +264,7 @@ const PixelDetails = () => {
   return (
     <Wrapper>
       <Header></Header>
+      <MainButton></MainButton>
       <DetailSearch>
         <TagWrapper>
           <CurrentKeywordTag>{searchProductName}</CurrentKeywordTag>
